@@ -1575,7 +1575,8 @@ def train(server=None):
                     log_debug('Computing %s...' % job)
 
                     # The feed_dict (mainly for switching between queues)
-                    feed_dict = {}
+                    is_training = job.set_name == 'train'
+                    feed_dict = {"is_training:0": is_training}
 
                     # Sets the current data_set for the respective placeholder in feed_dict
                     model_feeder.set_data_set(feed_dict, getattr(model_feeder, job.set_name))

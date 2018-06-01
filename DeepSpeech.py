@@ -411,6 +411,19 @@ def conv_output_length(input_length, filter_size, padding, stride,
         output_length = input_length - dilated_filter_size + 1
     return (output_length + stride - 1) // stride
 
+def decode_with_lm(inputs, sequence_length, beam_width=100,
+                   top_paths=1, merge_repeated=True):
+  decoded_ixs, decoded_vals, decoded_shapes, log_probabilities = (
+      custom_op_module.ctc_beam_search_decoder_with_lm(
+          inputs, sequence_length, beam_width=beam_width,
+          model_path=FLAGS.lm_binary_path, trie_path=FLAGS.lm_trie_path, alphabet_path=FLAGS.alphabet_config_path,
+          lm_weight=FLAGS.lm_weight, word_count_weight=FLAGS.word_count_weight, valid_word_count_weight=FLAGS.valid_word_count_weight,
+          top_paths=top_paths, merge_repeated=merge_repeated))
+
+  return (
+      [tf.SparseTensor(ix, val, shape) for (ix, val, shape)
+       in zip(decoded_ixs, decoded_vals, decoded_shapes)],
+      log_probabilities)
 
 def BiRNN(batch_x, seq_length, dropout, is_training, reuse):
 
